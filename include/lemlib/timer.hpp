@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include "units/units.hpp"
 
 namespace lemlib {
 class Timer {
@@ -13,61 +13,61 @@ class Timer {
          * @note if the timer is constructed in a global scope, its behavior is undefined. You can
          *       call set() before using the timer if you absolutely need to construct it in a global scope
          *
-         * @param time how long to wait, in milliseconds
+         * @param time how long to wait
          *
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * @endcode
          */
-        Timer(uint32_t time);
+        Timer(Time time);
         /**
          * @brief Get the amount of time the timer was set to
          *
-         * @return uint32_t time, in milliseconds
+         * @return Time time
          *
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * // get the time the timer was set to
-         * const uint32_t time = timer.getTimeSet(); // time = 1000
+         * const Time time = timer.getTimeSet(); // time = 1_sec
          * @endcode
          */
-        uint32_t getTimeSet();
+        Time getTimeSet();
         /**
          * @brief Get the amount of time left on the timer
          *
-         * @return uint32_t time in milliseconds
+         * @return Time time
          *
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * // delay for 300ms
          * pros::delay(300);
          * // get the time left on the timer
-         * const uint32_t time = timer.getTimeLeft(); // time = 700
+         * const Time time = timer.getTimeLeft(); // time = 700_msec
          * @endcode
          */
-        uint32_t getTimeLeft();
+        Time getTimeLeft();
         /**
          * @brief Get the amount of time passed on the timer
          *
-         * @return uint32_t time in milliseconds
+         * @return Time time
          *
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * // delay for 300ms
          * pros::delay(300);
          * // get the time passed on the timer
-         * const uint32_t time = timer.getTimePassed(); // time = 300
+         * const Time time = timer.getTimePassed(); // time = 300_msec
          * @endcode
          */
-        uint32_t getTimePassed();
+        Time getTimePassed();
         /**
          * @brief Get whether the timer is done or not
          *
@@ -77,7 +77,7 @@ class Timer {
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * // delay for 500ms
          * pros::delay(500);
          * // check if the timer is done
@@ -98,7 +98,7 @@ class Timer {
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * // pause the timer
          * timer.pause();
          * // check if the timer is paused
@@ -118,19 +118,19 @@ class Timer {
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * // set the timer to wait for 2 seconds
-         * timer.set(2000);
+         * timer.set(2_sec);
          * @endcode
          */
-        void set(uint32_t time);
+        void set(Time time);
         /**
          * @brief reset the timer
          *
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * // delay for 500ms
          * pros::delay(500);
          * // reset the timer
@@ -148,7 +148,7 @@ class Timer {
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * // pause the timer
          * timer.pause();
          * // delay for 2000ms
@@ -164,7 +164,7 @@ class Timer {
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * // pause the timer
          * timer.pause();
          * // delay for 500ms
@@ -184,7 +184,7 @@ class Timer {
          * @b Example
          * @code {.cpp}
          * // create a timer that will wait for 1 second
-         * Timer timer(1000);
+         * Timer timer(1_sec);
          * // wait until the timer is done
          * timer.waitUntilDone();
          * std::cout << "done!" << std::endl;
@@ -192,9 +192,11 @@ class Timer {
          */
         void waitUntilDone();
     private:
-        uint32_t period;
-        uint32_t lastTime;
-        uint32_t timeWaited = 0;
-        bool paused = false;
+        void update();
+
+        Time m_period;
+        Time m_lastTime = 0_sec;
+        Time m_timeWaited = 0_sec;
+        bool m_paused = false;
 };
 } // namespace lemlib

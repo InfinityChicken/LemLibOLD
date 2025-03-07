@@ -1,67 +1,65 @@
+#include "lemlib/Timer.hpp"
 #include "pros/rtos.hpp"
-#include "lemlib/timer.hpp"
 
 using namespace lemlib;
 
-Timer::Timer(uint32_t time)
-    : period(time) {
-    lastTime = pros::millis();
+Timer::Timer(Time time)
+    : m_period(time) {
+    m_lastTime = pros::millis() * msec;
 }
 
-uint32_t Timer::getTimeSet() {
-    const uint32_t time = pros::millis(); // get time from RTOS
-    if (!paused) timeWaited += time - lastTime; // don't update if paused
-    lastTime = time; // update last time
-    return period;
+void Timer::update() {
+    const Time time = pros::millis() * msec; // get current time from RTOS
+    if (!m_paused) m_timeWaited += time - m_lastTime; // dont update if paused
+    m_lastTime = time; // update last time
 }
 
-uint32_t Timer::getTimeLeft() {
-    const uint32_t time = pros::millis(); // get time from RTOS
-    if (!paused) timeWaited += time - lastTime; // don't update if paused
-    lastTime = time; // update last time
-    const int delta = period - timeWaited; // calculate how much time is left
-    return (delta > 0) ? delta : 0; // return 0 if timer is done
+Time Timer::getTimeSet() {
+    this->update();
+    return m_period;
 }
 
-uint32_t Timer::getTimePassed() {
-    const uint32_t time = pros::millis(); // get time from RTOS
-    if (!paused) timeWaited += time - lastTime; // don't update if paused
-    lastTime = time; // update last time;
-    return timeWaited;
+Time Timer::getTimeLeft() {
+    this->update();
+    const Time delta = m_period - m_timeWaited; // calculate how much time is left
+    return (delta > 0_sec) ? delta : 0_sec; // return 0 if timer is done
+}
+
+Time Timer::getTimePassed() {
+    this->update();
+    return m_timeWaited;
 }
 
 bool Timer::isDone() {
-    const uint32_t time = pros::millis(); // get time from RTOS
-    if (!paused) timeWaited += time - lastTime; // don't update if paused
-    lastTime = time; // update last time
-    const int delta = period - timeWaited; // calculate how much time is left
-    return delta <= 0;
+    this->update();
+    Time delta = m_period - m_timeWaited; // calculate how much time is left
+    return delta <= 0_sec;
 }
 
 bool Timer::isPaused() {
-    const uint32_t time = pros::millis(); // get time from RTOS
-    if (!paused) timeWaited += time - lastTime; // don't update if paused
-    return paused;
+    const Time time = pros::millis() * msec; // get time from RTOS
+    if (!m_paused) m_timeWaited += time - m_lastTime; // dont update if paused
+    return m_paused;
 }
 
-void Timer::set(uint32_t time) {
-    period = time; // set how long to wait
-    reset();
+void Timer::set(Time time) {
+    m_period = time; // set how long the timer should run
+    this->reset();
 }
 
 void Timer::reset() {
-    timeWaited = 0;
-    lastTime = pros::millis();
+    m_timeWaited = 0_sec;
+    m_lastTime = pros::millis() * msec;
 }
 
 void Timer::pause() {
-    if (!paused) lastTime = pros::millis();
-    paused = true;
+    if (!m_paused) m_lastTime = pros::millis() * msec;
+    m_paused = true;
 }
 
 void Timer::resume() {
-    if (paused) lastTime = pros::millis();
-    paused = false;
+    if (m_paused) m_lastTime = pros::millis() * msec;
+    m_paused = false;
 }
 
 void Timer::waitUntilDone() {
